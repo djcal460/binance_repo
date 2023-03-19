@@ -1,10 +1,8 @@
 import pandas as pd
-from binance.client import Client
 from tabulate import tabulate
 import account as ac
 from datetime import datetime, timedelta
-from binance import ThreadedWebsocketManager
-import time
+import os
 from flask import Flask, jsonify, request
 
 kline_intervals = {"1MINUTE": '1m', "3MINUTE": '3m', "5MINUTE": '5m',
@@ -30,16 +28,11 @@ def time_ago(weeks=None, days=None, hours=None, minutes=None, seconds=None):
 
 
 # app = Flask(__name__)
-api_key = ""
-secret_key = ""
+api_key = os.environ.get("binance_read_api_key")
+secret_key = os.environ.get("binance_read_secret_key")
 account = ac.Account(api_key, secret_key)
-def main():
-    """
-    GET ACCOUNT INFO
-    """
-    # get account
-    account = ac.Account(api_key, secret_key)
 
+def main():
     """
     GET ACCOUNT INFO
     """
@@ -162,102 +155,102 @@ def main():
 
 
 
-#Define Flask routes
-@app.route('/account/balances')
-def get_account_balances():
-    balances = account.account_info.get_balances()
-    return balances.to_json()
-
-@app.route('/account/balance/<string:ticker>')
-def get_account_balance(ticker):
-    balance = account.account_info.get_balance(ticker)
-    return jsonify(balance)
-
-@app.route('/account/snapshot/<string:account_type>')
-def get_account_snapshot(account_type):
-    snap, balances = account.account_info.get_snapshot(account_type)
-    return snap.to_json()
-
-@app.route('/account/rate_limits')
-def get_rate_limits():
-    rate_limits = account.account_info.get_rate_limits()
-    return jsonify(rate_limits)
-
-@app.route('/account/coins')
-def get_all_coin_info():
-    coins = account.account_info.get_all_coin_info()
-    return coins.to_json()
-
-@app.route('/account/coin_info/<string:ticker>')
-def get_coin_info(ticker):
-    coin_info = account.account_info.get_coin_info(ticker)
-    return coin_info.to_json()
-
-@app.route('/account/trade_fee/<string:tradepair>')
-def get_trade_fee(tradepair):
-    trade_fee = account.account_info.get_trade_fee(tradepair)
-    return trade_fee
-
-@app.route('/account/trade_pair_info/<string:tradepair>')
-def get_trade_pair_info(tradepair):
-    tradepair_info = account.account_info.get_trade_pair_info(tradepair)
-    return tradepair_info.to_json()
-
-@app.route('/market/ticker_info/<string:tradepair>')
-def get_ticker_info(tradepair):
-    ticker_info = account.market_info.get_ticker_info(tradepair)
-    return ticker_info
-
-@app.route('/market/avg_price/<string:tradepair>')
-def get_avg_price(tradepair):
-    avg_price = account.market_info.get_avg_price(tradepair)
-    return jsonify(avg_price)
-
-@app.route('/market/price_usdt/<string:ticker>')
-def get_price_usdt(ticker):
-    price_usdt = account.market_info.get_price_usdt(ticker)
-    return jsonify(price_usdt)
-
-@app.route('/market/all_prices')
-def get_all_prices():
-    all_prices = account.market_info.get_all_prices()
-    return all_prices.to_json()
-
-@app.route('/market/all_sym_pairs/<string:ticker>')
-def get_all_sym_pairs(ticker):
-    all_sym_pairs = account.market_info.get_all_sym_pairs(ticker)
-    return all_sym_pairs.to_json()
-
-@app.route('/market/all_stable_pairs/<string:ticker1>')
-def get_all_stable_pairs(ticker1):
-    all_stable_pairs = account.market_info.get_all_stable_pairs(ticker1)
-    return all_stable_pairs.to_json()
-
-@app.route('/market/24h_data/<string:tradepair>')
-def get_24h_data(tradepair):
-    data = account.market_info.get_24h_data(tradepair)
-    return jsonify(data)
-
-@app.route('/api/historicaldata', methods=['GET'])
-def get_historical_data():
-    tradepair = request.args.get('tradepair')
-    interval = request.args.get('interval')
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-    historical_data_df = account.historical_data.get_historical_data(tradepair, interval, start_date, end_date)
-    historical_data_df.to_html()
-    return historical_data_df.to_html()
-
-# Get historical data from a local file
-@app.route('/api/historicaldata/from_file', methods=['GET'])
-def get_historical_data_from_file():
-    path = request.args.get('path')
-    historical_data_df = account.historical_data.get_historical_from_file(path)
-    return jsonify(historical_data_df.to_dict())
+# #Define Flask routes
+# @app.route('/account/balances')
+# def get_account_balances():
+#     balances = account.account_info.get_balances()
+#     return balances.to_json()
+#
+# @app.route('/account/balance/<string:ticker>')
+# def get_account_balance(ticker):
+#     balance = account.account_info.get_balance(ticker)
+#     return jsonify(balance)
+#
+# @app.route('/account/snapshot/<string:account_type>')
+# def get_account_snapshot(account_type):
+#     snap, balances = account.account_info.get_snapshot(account_type)
+#     return snap.to_json()
+#
+# @app.route('/account/rate_limits')
+# def get_rate_limits():
+#     rate_limits = account.account_info.get_rate_limits()
+#     return jsonify(rate_limits)
+#
+# @app.route('/account/coins')
+# def get_all_coin_info():
+#     coins = account.account_info.get_all_coin_info()
+#     return coins.to_json()
+#
+# @app.route('/account/coin_info/<string:ticker>')
+# def get_coin_info(ticker):
+#     coin_info = account.account_info.get_coin_info(ticker)
+#     return coin_info.to_json()
+#
+# @app.route('/account/trade_fee/<string:tradepair>')
+# def get_trade_fee(tradepair):
+#     trade_fee = account.account_info.get_trade_fee(tradepair)
+#     return trade_fee
+#
+# @app.route('/account/trade_pair_info/<string:tradepair>')
+# def get_trade_pair_info(tradepair):
+#     tradepair_info = account.account_info.get_trade_pair_info(tradepair)
+#     return tradepair_info.to_json()
+#
+# @app.route('/market/ticker_info/<string:tradepair>')
+# def get_ticker_info(tradepair):
+#     ticker_info = account.market_info.get_ticker_info(tradepair)
+#     return ticker_info
+#
+# @app.route('/market/avg_price/<string:tradepair>')
+# def get_avg_price(tradepair):
+#     avg_price = account.market_info.get_avg_price(tradepair)
+#     return jsonify(avg_price)
+#
+# @app.route('/market/price_usdt/<string:ticker>')
+# def get_price_usdt(ticker):
+#     price_usdt = account.market_info.get_price_usdt(ticker)
+#     return jsonify(price_usdt)
+#
+# @app.route('/market/all_prices')
+# def get_all_prices():
+#     all_prices = account.market_info.get_all_prices()
+#     return all_prices.to_json()
+#
+# @app.route('/market/all_sym_pairs/<string:ticker>')
+# def get_all_sym_pairs(ticker):
+#     all_sym_pairs = account.market_info.get_all_sym_pairs(ticker)
+#     return all_sym_pairs.to_json()
+#
+# @app.route('/market/all_stable_pairs/<string:ticker1>')
+# def get_all_stable_pairs(ticker1):
+#     all_stable_pairs = account.market_info.get_all_stable_pairs(ticker1)
+#     return all_stable_pairs.to_json()
+#
+# @app.route('/market/24h_data/<string:tradepair>')
+# def get_24h_data(tradepair):
+#     data = account.market_info.get_24h_data(tradepair)
+#     return jsonify(data)
+#
+# @app.route('/api/historicaldata', methods=['GET'])
+# def get_historical_data():
+#     tradepair = request.args.get('tradepair')
+#     interval = request.args.get('interval')
+#     start_date = request.args.get('start_date')
+#     end_date = request.args.get('end_date')
+#     historical_data_df = account.historical_data.get_historical_data(tradepair, interval, start_date, end_date)
+#     historical_data_df.to_html()
+#     return historical_data_df.to_html()
+#
+# # Get historical data from a local file
+# @app.route('/api/historicaldata/from_file', methods=['GET'])
+# def get_historical_data_from_file():
+#     path = request.args.get('path')
+#     historical_data_df = account.historical_data.get_historical_from_file(path)
+#     return jsonify(historical_data_df.to_dict())
 
 
 
 
 if __name__ == "__main__":
     main()
-    app.run(debug=True)
+    # app.run(debug=True)
